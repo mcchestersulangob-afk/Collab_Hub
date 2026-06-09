@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>CollabHub — Peer Tutoring & Academic Support</title>
+    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+    <link href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css" rel="stylesheet"/>
+    <link rel="stylesheet" href="style.css?v=layout-skeleton-1">
+</head>
+<body>
+
+<div id="login-page">
+  <div class="login-card" style="width:380px">
+    <div class="login-logo">
+      <div class="logo-icon" style="width:36px;height:36px;border-radius:10px;font-size:20px">
+        <i class="ti ti-circles-relation"></i>
+      </div>
+      CollabHub
+    </div>
+    <p class="login-sub">Peer tutoring & academic support platform</p>
+
+    <p style="font-size:11px;font-weight:500;letter-spacing:0.8px;color:var(--text-tertiary);text-transform:uppercase;margin-bottom:10px">Sign in as</p>
+    <div class="role-select">
+      <div class="role-option selected" id="role-student" onclick="selectRole('student')">
+        <i class="ti ti-user-graduate role-icon"></i>
+        <p class="role-name">Student</p>
+        <p class="role-desc">Ask & answer questions</p>
+      </div>
+      <div class="role-option teacher" id="role-teacher" onclick="selectRole('teacher')">
+        <i class="ti ti-school role-icon"></i>
+        <p class="role-name">Teacher</p>
+        <p class="role-desc">Answer & verify responses</p>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Full name</label>
+      <input type="text" class="form-input" id="login-name" placeholder="e.g. Alex Lim" />
+    </div>
+    <div class="form-group">
+      <label class="form-label">Email</label>
+      <input type="email" class="form-input" id="login-email" placeholder="you@school.edu" />
+    </div>
+    <div class="form-group">
+      <label class="form-label">Password</label>
+      <div class="password-input-wrap">
+        <input type="password" class="form-input password-input" id="login-password" placeholder="••••••••" />
+        <button type="button" class="password-toggle" onclick="togglePasswordVisibility('login-password')" aria-label="Show password" title="Show password">
+          <i class="ti ti-eye-off"></i>
+        </button>
+      </div>
+    </div>
+
+<button class="btn primary" style="width:100%;justify-content:center;padding:10px" onclick="doLogin()">
+      Log in <i class="ti ti-arrow-right"></i>
+    </button>
+    <p style="font-size:11px;color:var(--text-tertiary);text-align:center;margin-top:12px">
+Don’t have an account? <span class="login-link" onclick="openSignupModal()">Sign in</span>
+    </p>
+    <div style="text-align:center;font-size:11px;color:var(--text-tertiary);margin-top:6px">Create your account to get started.</div>
+  </div>
+</div>
+
+<div id="app" style="display:none">
+  <nav class="topbar">
+    <a class="logo" href="#" onclick="showFeed()">
+      <div class="logo-icon"><i class="ti ti-circles-relation"></i></div>
+      CollabHub
+    </a>
+    <div class="search-bar">
+      <i class="ti ti-search" style="font-size:14px;color:var(--text-tertiary)"></i>
+      <input type="text" id="search-input" placeholder="Search questions, #tags, topics…" oninput="handleSearch(this.value)" />
+    </div>
+      <div class="topbar-right">
+      <span class="role-badge" id="topbar-role-badge">Student</span>
+      <button class="btn primary sm" onclick="openAskModal()">
+        <i class="ti ti-plus"></i> Ask a question
+      </button>
+      <button class="btn ghost sm" onclick="logout()" title="Log out">
+        <i class="ti ti-logout"></i> Log out
+      </button>
+      <button class="icon-btn" onclick="toggleTheme()" title="Toggle theme">
+        <i class="ti ti-moon" id="theme-icon"></i>
+      </button>
+      <button type="button" class="avatar avatar-button" id="topbar-avatar" title="Upload profile picture">AL</button>
+      <input type="file" id="profile-picture-input" accept="image/*" style="display:none">
+    </div>
+  </nav>
+
+  <div class="app-layout">
+    <aside class="sidebar">
+      <div class="sidebar-section">
+        <p class="sidebar-label">Navigate</p>
+        <div class="nav-item active" id="nav-home" onclick="filterFeed('all')">
+          <i class="ti ti-home"></i> Home feed
+        </div>
+        <div class="nav-item" id="nav-unanswered" onclick="filterFeed('unanswered')">
+          <i class="ti ti-help-circle"></i> Unanswered
+          <span class="nav-badge" id="unanswered-nav-count">0</span>
+        </div>
+        <div class="nav-item" id="nav-myq" onclick="filterFeed('mine')">
+          <i class="ti ti-message-question"></i> My questions
+        </div>
+        <div class="nav-item" id="nav-saved" onclick="filterFeed('saved')">
+          <i class="ti ti-bookmark"></i> Saved
+        </div>
+        <div class="nav-item" id="nav-verified" onclick="filterFeed('verified')">
+          <i class="ti ti-rosette-discount-check"></i> Teacher verified
+        </div>
+      </div>
+      <div class="sidebar-section">
+        <p class="sidebar-label">Topics</p>
+        <div id="sidebar-tags"></div>
+      </div>
+    </aside>
+
+    <main class="main-feed" id="main-feed">
+      <div class="ask-box">
+        <div class="avatar" id="feed-avatar" style="margin-top:2px">AL</div>
+        <textarea class="ask-input" rows="1" placeholder="What do you need help with today?" id="quick-ask" oninput="autoResize(this)"></textarea>
+        <div class="ask-actions">
+          <button class="icon-btn" onclick="openAskModal()" title="Upload image" style="width:30px;height:30px;font-size:14px">
+            <i class="ti ti-photo"></i>
+          </button>
+          <button class="btn primary sm" onclick="quickAsk()">Post</button>
+        </div>
+      </div>
+
+      <div class="tabs">
+        <div class="tab active" id="tab-all" onclick="setTab('all')">All questions</div>
+        <div class="tab" id="tab-unanswered" onclick="setTab('unanswered')">Unanswered</div>
+        <div class="tab" id="tab-verified" onclick="setTab('verified')">Teacher verified</div>
+      </div>
+
+      <div class="section-header">
+        <span class="section-title" id="feed-title">Recent questions</span>
+        <span class="section-count" id="feed-count">0 questions</span>
+      </div>
+      <div id="feed-list"></div>
+    </main>
+
+    <div id="detail-view">
+      <button class="back-btn" onclick="closeFeed()">
+        <i class="ti ti-arrow-left"></i> Back to feed
+      </button>
+      <div id="detail-content"></div>
+    </div>
+
+    <aside class="right-panel">
+      <p class="sidebar-label" style="padding:0;margin-bottom:10px">Overview</p>
+      <div class="stats-grid">
+        <div class="stat-card">
+          <p class="stat-label">Questions</p>
+          <p class="stat-val" id="stat-total">0</p>
+        </div>
+        <div class="stat-card">
+          <p class="stat-label">Unanswered</p>
+          <p class="stat-val amber" id="stat-unanswered">0</p>
+        </div>
+        <div class="stat-card">
+          <p class="stat-label">Verified</p>
+          <p class="stat-val green" id="stat-verified">0</p>
+        </div>
+        <div class="stat-card">
+          <p class="stat-label">Members</p>
+          <p class="stat-val" id="stat-members">0</p>
+        </div>
+      </div>
+      <div class="divider"></div>
+      <p class="sidebar-label" style="padding:0;margin-bottom:8px">Top contributors</p>
+      <div id="top-contributors"></div>
+      <div class="divider"></div>
+      <p class="sidebar-label" style="padding:0;margin-bottom:8px">Trending tags</p>
+      <div id="trending-tags"></div>
+    </aside>
+  </div>
+</div>
+
+<div class="modal-overlay" id="ask-modal" onclick="handleOverlayClick(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">Ask a question</span>
+      <button class="icon-btn" onclick="closeAskModal()" style="width:28px;height:28px;font-size:15px">
+        <i class="ti ti-x"></i>
+      </button>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Question title *</label>
+      <input type="text" class="form-input" id="q-title" placeholder="e.g. How do I solve quadratic equations?" />
+    </div>
+    
+
+
+    <div class="form-group">
+      <label class="form-label">Details (optional)</label>
+      <textarea class="form-input" id="q-body" placeholder="Add more context, what have you tried so far?"></textarea>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Tags <span style="color:var(--text-tertiary)">(press Enter or comma to add)</span></label>
+      <div class="tags-input-wrap" id="tags-wrap" onclick="document.getElementById('tag-input').focus()">
+        <input type="text" class="tag-add-input" id="tag-input" placeholder="#add a topic…" onkeydown="handleTagInput(event)" />
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Upload an image (optional)</label>
+      <div class="upload-area" onclick="document.getElementById('file-input').click()">
+        <i class="ti ti-photo-up"></i>
+        <span>Click to upload a photo of your question</span>
+        <input type="file" id="file-input" accept="image/png,image/jpeg,image/gif,image/webp" style="display:none" onchange="handleFileUpload(event)"/>
+      </div>
+      <div id="upload-preview" style="margin-top:8px;display:none">
+        <img id="upload-image-preview" class="upload-image-preview" alt="Selected question image">
+        <div style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--bg-secondary);border-radius:var(--radius-md);font-size:12px">
+          <i class="ti ti-photo" style="color:var(--blue)"></i>
+          <span id="upload-filename"></span>
+          <button class="btn ghost sm" style="margin-left:auto;padding:2px 8px" onclick="removeUpload()">Remove</button>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeAskModal()">Cancel</button>
+      <button class="btn primary" onclick="submitQuestion()">
+        <i class="ti ti-send"></i> Post question
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="edit-question-modal" onclick="handleOverlayClick(event)">
+  <div class="modal" style="width:520px">
+    <div class="modal-header">
+      <span class="modal-title">Edit question</span>
+      <button class="icon-btn" onclick="closeEditQuestionModal()" style="width:28px;height:28px;font-size:15px">
+        <i class="ti ti-x"></i>
+      </button>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Question title *</label>
+      <input type="text" class="form-input" id="edit-q-title" />
+    </div>
+    <div class="form-group">
+      <label class="form-label">Details</label>
+      <textarea class="form-input" id="edit-q-body"></textarea>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Tags <span style="color:var(--text-tertiary)">(comma separated)</span></label>
+      <input type="text" class="form-input" id="edit-q-tags" placeholder="#math, #algebra" />
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeEditQuestionModal()">Cancel</button>
+      <button class="btn primary" onclick="submitQuestionEdit()">
+        <i class="ti ti-device-floppy"></i> Save changes
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="edit-answer-modal" onclick="handleOverlayClick(event)">
+  <div class="modal" style="width:520px">
+    <div class="modal-header">
+      <span class="modal-title">Edit answer</span>
+      <button class="icon-btn" onclick="closeEditAnswerModal()" style="width:28px;height:28px;font-size:15px">
+        <i class="ti ti-x"></i>
+      </button>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Answer</label>
+      <textarea class="form-input" id="edit-answer-body"></textarea>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeEditAnswerModal()">Cancel</button>
+      <button class="btn primary" onclick="submitAnswerEdit()">
+        <i class="ti ti-device-floppy"></i> Save changes
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="toast-container" id="toast-container"></div>
+
+<div class="modal-overlay" id="signup-modal" onclick="handleOverlayClick(event)" style="z-index:250">
+<div class="modal" style="max-width:350px">
+    <div class="modal-header">
+      <span class="modal-title">Create your account</span>
+      <button class="icon-btn" onclick="closeSignupModal()" style="width:28px;height:28px;font-size:15px">
+        <i class="ti ti-x"></i>
+      </button>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Full name</label>
+      <input type="text" class="form-input" id="signup-name" placeholder="e.g. Alex Lim" />
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Email</label>
+      <input type="email" class="form-input" id="signup-email" placeholder="you@school.edu" />
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Password</label>
+      <div class="password-input-wrap">
+        <input type="password" class="form-input password-input" id="signup-password" placeholder="••••••••" />
+        <button type="button" class="password-toggle" onclick="togglePasswordVisibility('signup-password')" aria-label="Show password" title="Show password">
+          <i class="ti ti-eye-off"></i>
+        </button>
+      </div>
+    </div>
+
+    <p style="font-size:11px;font-weight:500;letter-spacing:0.8px;color:var(--text-tertiary);text-transform:uppercase;margin-bottom:10px">Sign up as</p>
+    <div class="role-select" style="grid-template-columns: 1fr 1fr; margin-bottom: 18px;">
+      <div class="role-option selected" id="signup-role-student" onclick="selectSignupRole('student')">
+        <i class="ti ti-user-graduate role-icon"></i>
+        <p class="role-name">Student</p>
+        <p class="role-desc">Ask & answer questions</p>
+      </div>
+      <div class="role-option" id="signup-role-teacher" onclick="selectSignupRole('teacher')">
+        <i class="ti ti-school role-icon"></i>
+        <p class="role-name">Teacher</p>
+        <p class="role-desc">Answer & verify responses</p>
+      </div>
+    </div>
+    <input type="hidden" id="signup-role" value="student" />
+
+    <div class="modal-footer">
+      <button class="btn" onclick="closeSignupModal()">Cancel</button>
+      <button class="btn primary" onclick="submitSignup()">
+        <i class="ti ti-user-plus"></i> Create account
+      </button>
+    </div>
+  </div>
+</div>
+
+<script src="jquery.js"></script>
+
+<!-- Split frontend JS (modular, same behavior) -->
+<script src="assets/js/app/state.js?v=layout-skeleton-1"></script>
+<script src="assets/js/app/utils.js"></script>
+<script src="assets/js/app/bootstrap.js?v=layout-skeleton-1"></script>
+
+<script src="assets/js/auth/login-signup.js"></script>
+
+<script src="assets/js/questions/api.js?v=layout-skeleton-1"></script>
+<script src="assets/js/questions/filters.js"></script>
+<script src="assets/js/questions/render.js?v=layout-skeleton-1"></script>
+<script src="assets/js/questions/modals.js?v=layout-skeleton-1"></script>
+<script src="assets/js/questions/tags-input.js"></script>
+
+<script src="assets/js/uploads/question-image.js"></script>
+
+</body>
+</html>
